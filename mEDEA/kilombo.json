@@ -1,7 +1,7 @@
 {
 	"distributePercent" : 1,
 	"seed" : 100,
-    "nBots" : 700,
+    "nBots" : 300,
 		"simulationTime" : 3600,
     "commsRadius" : 100,
     "showCommsRadius" : 0,
@@ -16,5 +16,6 @@
     "colorscheme" : "bright",
     "GUI" : 1,
 		"showHist" : 1,
-		"histLength" : 1000
-}
+		"histLength" : 1000,
+		"noMovable" : [ 0,1,2,3 ]
+	}

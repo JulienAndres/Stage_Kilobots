@@ -140,11 +140,14 @@ void genome_alea(){
 }
 
 int fitness(){
-
+	return fitness2();
 	int i;
 	int fit=0;
 	for (i=0;i<TIMEUPDATE;i++){
 		fit+=mydata->last_fitness[i];
+	}
+	if (bienmange()){
+		fit*=2;
 	}
 	if (mydata->dead==1){
 		return 255;
@@ -152,6 +155,30 @@ int fitness(){
 	// toRet/=TIMEUPDATE;
 	// pri++){ntf("uid %d fit %d\n",kilo_uid,fit );
 	return fit;
+}
+
+int fitness2(){//fitness d'aglomération
+	int i=0;
+	uint32_t fit=mydata->nb_voisins;
+	for(;i<mydata->nb_voisins;i++){
+			fit+=mydata->voisins_liste[i].nb_voisins;
+			if(isfood(mydata->voisins_liste[i].id))
+				fit=254;
+	}
+	if(fit>254) fit=254;
+	return fit;
+}
+
+int bienmange(){
+	int i;
+	int fit=0;
+	for (i=0;i<TIMEUPDATE;i++){
+		fit+=mydata->last_fitness[i];
+	}
+	if (fit>TIMEUPDATE/2){
+		return 1;
+	}
+	return 0;
 }
 
 
@@ -180,7 +207,7 @@ void loop() {
 // }
 
 	if (isfood(kilo_uid)){
-	set_color(RGB(1,0,0));
+	set_color(RGB(3,3,0));
 	 	emission();
 		return;
 	}
@@ -275,7 +302,7 @@ char *botinfo(void)
   return botinfo_buffer;
 }
 
-#define MUR 1000
+#define MUR 1500
 
 int16_t callback_obstacles(double x, double y, double *m1, double *m2){
     if (x > MUR || x< -MUR || y>MUR|| y<-MUR){

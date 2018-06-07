@@ -6,18 +6,20 @@
     #define GENOMEPARAM 8
     #define MAXROBOT 100
     #define TIMEUPDATE 40
-    #define IDFOOD 0,1,2,3,4,5,6,7,8,9
-    #define NBFOOD 10
-    #define PROBA_MUTATION 0.1
+    #define IDFOOD  0,1,2,3
+    #define NBFOOD 4
+    #define PROBA_MUTATION 0.0000
 
 void setup();
 void genome_alea();
 void loop();
 int main();
-int fitness();
+int fitness();//fitness bloc actif
+int fitness2();//fitness d'aglomération
 int isfood(int);
 
 void do_stats();
+int bienmange();
 
 int16_t callback_obstacles(double x, double y, double *m1, double *m2);
 char *botinfo(void);

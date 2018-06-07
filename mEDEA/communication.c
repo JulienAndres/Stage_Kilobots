@@ -108,6 +108,8 @@ void update_from_message(){
 		mydata->voisins_liste[i].id=ID;
 		mydata->voisins_liste[i].timestamp=kilo_ticks;
 		mydata->voisins_liste[i].dist=distance;
+		mydata->voisins_liste[i].nb_voisins=mydata->message.data[6];
+		if(isfood(ID)) mydata->voisins_liste[i].nb_voisins=254;
 
 
 /*update du génome de ce voisin
@@ -214,25 +216,21 @@ void setup_message(){
 	// 	mydata->msg_transmis.data[i+1]=mydata->genome[i];
 	// }
 	//genome est entre {-1,0,1}:
-	int i=0;
-	for(i=0;i<GENOMEPARAM;i++){
-		printf("%d ",mydata->genome[i] );
-	}
-	printf("genome mydata\n" );
 	int tmp1=100*(mydata->genome[0])+10*(mydata->genome[1])+mydata->genome[2];
 	int tmp2=100*(mydata->genome[3])+10*(mydata->genome[4])+mydata->genome[5];
 	int tmp3=100*(mydata->genome[6])+10*(mydata->genome[7]);
 	mydata->msg_transmis.data[1]=tmp1;//transmition genome
 	mydata->msg_transmis.data[2]=tmp2;//transmition genome
 	mydata->msg_transmis.data[3]=tmp3;//transmition genome
+	mydata->msg_transmis.data[6]=mydata->nb_voisins;
 	mydata->msg_transmis.data[7]=mydata->parent;//transmition parent
 	mydata->msg_transmis.data[8]=fitness();//transmition fitness
 
-	i=0;
-	for(i=0;i<9;i++){
-		printf("%d ",mydata->msg_transmis.data[i]);
-	}
-	printf("genome transmis\n" );
+	// i=0;
+	// for(i=0;i<9;i++){
+	// 	printf("%d ",mydata->msg_transmis.data[i]);
+	// }
+	// printf("genome transmis\n" );
 	mydata->msg_transmis.crc = message_crc(&mydata->msg_transmis);
 
 
@@ -244,6 +242,7 @@ void setup_message_fitness(){
 	mydata->broadcast=0;//ne pas transmettre quand on change le message
 
 	mydata->msg_transmis.data[8]=fitness();
+		mydata->msg_transmis.data[6]=mydata->nb_voisins;
 	// if(kilo_uid!=IDFOOD) printf("fit setup message %d\n",mydata->msg_transmis.data[8] );
 	mydata->msg_transmis.crc = message_crc(&mydata->msg_transmis);
 
