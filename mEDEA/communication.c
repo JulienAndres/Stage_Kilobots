@@ -26,9 +26,12 @@ void update_voisins(){
 int is_feed(){
 	int i;
 	for( i=0;i<mydata->nb_voisins;i++){
-		if(mydata->voisins_liste[i].id==IDFOOD){
+		if(isfood(mydata->voisins_liste[i].id)){
 			return 1;
 		}
+		// if(mydata->voisins_liste[i].id==IDFOOD){
+		// 	return 1;
+		// }
 	}
 	return 0;
 }
@@ -83,6 +86,7 @@ void update_from_message(){
 	// 	update_only_voisins_from_message();
 	// 	return;
 	// }
+	if (mydata->message.data[8]==255) return; //255 correspond à un kilobot dead (voir fonction fitness dans mEDEA.c)
 	uint8_t found_id=0;
 	uint32_t distance=mydata->message_dist;
 	int ID=mydata->message.data[0];
@@ -108,7 +112,8 @@ void update_from_message(){
 
 /*update du génome de ce voisin
 */
-	if (ID==IDFOOD) return;
+	// if (ID==IDFOOD) return;
+	if(isfood(ID)) return;
 	if (mydata->message.data[8]==255) return; //255 correspond à un kilobot dead (voir fonction fitness dans mEDEA.c)
 	found_id=0;
 	i=0;
@@ -178,7 +183,7 @@ void update_from_message(){
 void update_fitness(){
 	int i;
 	for(i=0;i<mydata->nb_voisins;i++){
-		if (mydata->voisins_liste[i].id==IDFOOD){
+		if (isfood(mydata->voisins_liste[i].id)){
 			mydata->last_fitness[mydata->last_update_fitness]=1;
 			mydata->last_update_fitness=(mydata->last_update_fitness+1)%TIMEUPDATE;
 			return;

@@ -20,7 +20,7 @@ void canBroadcast(){
   mydata->last_allowed=kilo_ticks;
   int i;
   for(i=0;i<mydata->nb_voisins;i++){
-    if (mydata->voisins_liste[i].id==IDFOOD){
+    if (isfood(mydata->voisins_liste[i].id)){
       double proba=probaBroadcast(mydata->voisins_liste[i].dist);
       int rd=rand();
       // printf("%d\n", RAND_MAX*(1-proba));

@@ -64,15 +64,15 @@ genome_alea();
 
 
 	mydata->time_update_fitness=0;
-	char nu[3];
-	snprintf(nu,3,"%d",kilo_uid);
-	// itoa(kilo_uid,nu,10);
-	char name[20]="stats_robot/";
-	strcat(name,nu);
-	// printf("%s\n",name );
-	// name=""
-	 mydata->fichier=fopen(name,"w");
-	 mydata->ecrire=1;
+	// char nu[3];
+	// snprintf(nu,3,"%d",kilo_uid);
+	// // itoa(kilo_uid,nu,10);
+	// char name[20]="stats_robot/";
+	// strcat(name,nu);
+	// // printf("%s\n",name );
+	// // name=""
+	//  mydata->fichier=fopen(name,"w");
+	//  mydata->ecrire=1;
 }
 
 void genome_alea(){
@@ -95,7 +95,7 @@ void genome_alea(){
 			mydata->last_genome_update=kilo_ticks;
 			return;
 		}
-		float bestfit=mydata->genome_list[0].fitness;
+		int bestfit=mydata->genome_list[0].fitness;
 		int best_indice=0;
 		int i=0;
 		for (i=0;i<mydata->nb_genome;i++){
@@ -160,31 +160,31 @@ int fitness(){
 void loop() {
 	//52 loop par secondes sur simulateur
 //TEST
-	if (kilo_ticks%(60*SECONDE)==0 && mydata->ecrire==1){
-		fprintf(mydata->fichier, "%d\n",mydata->dead );
-		// if(mydata->dead){
-		// 	fprintf(mydata->fichier, "%d\n",-1 );
-		// }else{
-		// 	fprintf(mydata->fichier, "%d\n",mydata->parent );
-		// }
-		// if(mydata->dead){
-		// 	fprintf(mydata->fichier, "%d\n",-1 );
-		// }else{
-		// 	fprintf(mydata->fichier, "%d%d%d%d%d%d%d%d\n",mydata->genome[0],mydata->genome[1],mydata->genome[2],mydata->genome[3],mydata->genome[4],mydata->genome[5],mydata->genome[6],mydata->genome[7] );
-		// }
+	// if (kilo_ticks%(60*SECONDE)==0 && mydata->ecrire==1){
+	// 	fprintf(mydata->fichier, "%d\n",mydata->dead );
+	// 	// if(mydata->dead){
+	// 	// 	fprintf(mydata->fichier, "%d\n",-1 );
+	// 	// }else{
+	// 	// 	fprintf(mydata->fichier, "%d\n",mydata->parent );
+	// 	// }
+	// 	// if(mydata->dead){
+	// 	// 	fprintf(mydata->fichier, "%d\n",-1 );
+	// 	// }else{
+	// 	// 	fprintf(mydata->fichier, "%d%d%d%d%d%d%d%d\n",mydata->genome[0],mydata->genome[1],mydata->genome[2],mydata->genome[3],mydata->genome[4],mydata->genome[5],mydata->genome[6],mydata->genome[7] );
+	// 	// }
+	//
+	// 	mydata->ecrire=0;
+	// }
+// if (kilo_ticks%SECONDE==1){
+// 	mydata->ecrire=1;
+// }
 
-		mydata->ecrire=0;
-	}
-if (kilo_ticks%SECONDE==1){
-	mydata->ecrire=1;
-}
-
-	if (kilo_uid==IDFOOD){
+	if (isfood(kilo_uid)){
 	set_color(RGB(1,0,0));
 	 	emission();
 		return;
 	}
-	if(kilo_ticks>mydata->time_update_fitness+SECONDE/4){
+	if(kilo_ticks>mydata->time_update_fitness+SECONDE/2){
 		update_fitness();
 		mydata->time_update_fitness=kilo_ticks;
 		// printf("%d \n",mydata->last_update_fitness );
@@ -213,6 +213,16 @@ if (kilo_ticks%SECONDE==1){
 
 	}
 
+}
+
+int isfood(int idrobot){
+	uint8_t i=0;
+	int food[NBFOOD] = {IDFOOD};
+	for(;i<NBFOOD;i++){
+		if(idrobot==food[i])
+			return 1;
+	}
+	return 0;
 }
 
 
@@ -265,7 +275,7 @@ char *botinfo(void)
   return botinfo_buffer;
 }
 
-#define MUR 500
+#define MUR 1000
 
 int16_t callback_obstacles(double x, double y, double *m1, double *m2){
     if (x > MUR || x< -MUR || y>MUR|| y<-MUR){
