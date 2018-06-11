@@ -65,10 +65,6 @@ void genome_alea(){
 			// printf("%d ",mydata->genome[i] );
 		}
 
-		if(kilo_uid == 1){
-			printf("Changed genome");
-		}
-
 		//mutation
 		if (((float)rand_hard())/256 < PROBA_MUTATION){
 			int indice_change=rand_hard()/(256/GENOMEPARAM);
@@ -99,11 +95,11 @@ int fitness(){
 
 void loop() {
 	//52 loop par secondes sur simulateur
-	if (kilo_uid==IDFOOD){
-	set_color(RGB(1,0,0));
-	 	emission();
-		return;
-	}
+	// if (kilo_uid==IDFOOD){
+	// set_color(RGB(1,0,0));
+	//  	emission();
+	// 	return;
+	// }
 	if(kilo_ticks>mydata->time_update_fitness+SECONDE){
 		update_fitness();
 		mydata->time_update_fitness=kilo_ticks;
@@ -333,14 +329,14 @@ int arrondi(double n){
 	return n+0.5;
 }
 
-void emission(){
-	// Blink the LED magenta whenever a message is sent.
-	if (mydata->message_sent == 1)
-	{
-		mydata->message_sent = 0;
-		set_color(RGB(0, 0, 1));
-	}
-}
+// void emission(){
+// 	// Blink the LED magenta whenever a message is sent.
+// 	if (mydata->message_sent == 1)
+// 	{
+// 		mydata->message_sent = 0;
+// 		set_color(RGB(0, 0, 1));
+// 	}
+// }
 
 void motion_dead(){
 		set_motors(0, 0);

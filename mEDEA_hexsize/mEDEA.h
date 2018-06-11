@@ -74,7 +74,6 @@ int arrondi(double n);
       uint32_t last_genome_update;
       uint8_t genome_setup;
       uint8_t dead;
-      uint32_t last_allowed;
 
     } USERDATA;
 
