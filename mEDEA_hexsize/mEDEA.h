@@ -6,7 +6,7 @@
     #define GENOMEPARAM 8
     #define MAXROBOT 100
     #define TIMEUPDATE 40
-    #define IDFOOD 0
+    #define IDFOOD 99
     #define PROBA_MUTATION 0
 
 void setup();
@@ -16,7 +16,6 @@ int main();
 int fitness();
 void set_motion(uint8_t motion);
 void genome_motion();
-void motion_dead();
 void update_voisins();
 int is_feed();
 void emission();
