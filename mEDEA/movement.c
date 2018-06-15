@@ -65,7 +65,7 @@ void set_random_turning_direction(){
 
 
 void genome_motion(){//controlleur
-	set_color(RGB(0,1,0));
+	// set_color(RGB(0,1,0));
 	uint32_t moyenne=0; //distance moyenne des voisins
 	int i;
 	if (mydata->nb_voisins){
@@ -81,9 +81,9 @@ void genome_motion(){//controlleur
 	 moteur_d=1.0/(1.0+exp(-moteur_d));
 
 
-	int real_g=arrondi((kilo_turn_left-60)*moteur_g)+60; //60 pour la vitesse minimale
-	int real_d=arrondi((kilo_turn_right-60)*moteur_d)+60;
-	// printf(" reeal gauche %d droit %d\n",real_g, real_d);
+	int real_g=arrondi((kilo_turn_left-(kilo_turn_left-20))*moteur_g)+(kilo_turn_left-20); //60 pour la vitesse minimale
+	int real_d=arrondi((kilo_turn_right-(kilo_turn_right-20))*moteur_d)+(kilo_turn_right-20);
+	 // printf(" reeal gauche %d droit %d\n",real_g, real_d);
 	spinup_motors();
 	set_motors(real_g, real_d);
 

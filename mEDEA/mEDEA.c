@@ -1,5 +1,6 @@
 #include <kilombo.h>
 #include <stdio.h>
+#include <math.h>
 #include "mEDEA.h"
 #include "proba.h"
 #include "communication.h"
@@ -64,15 +65,22 @@ genome_alea();
 
 
 	mydata->time_update_fitness=0;
-	// char nu[3];
-	// snprintf(nu,3,"%d",kilo_uid);
-	// // itoa(kilo_uid,nu,10);
-	// char name[20]="stats_robot/";
-	// strcat(name,nu);
-	// // printf("%s\n",name );
-	// // name=""
-	//  mydata->fichier=fopen(name,"w");
-	//  mydata->ecrire=1;
+	char nu[7];
+	snprintf(nu,7,"%d",kilo_uid);
+	// itoa(kilo_uid,nu,10);
+	char name[50]="stats_robot/";
+	strcat(name,nu);
+	// printf("%s\n",name );
+	// name=""
+	 mydata->fichier=fopen(name,"w");
+	 mydata->ecrire=1;
+	 printf("fin setup\n" );
+}
+void set_genome(){
+	int i=0;
+	for(;i<GENOMEPARAM;i++){
+		mydata->genome[i]=2;
+	}
 }
 
 void genome_alea(){
@@ -88,6 +96,7 @@ void genome_alea(){
 			printf("%d  ",mydata->genome[j] );
 		}
 		printf("\n");
+		set_genome();
 	}else{
 		if(!mydata->nb_genome){
 			printf("%d DIED\n", kilo_uid);
@@ -134,21 +143,28 @@ void genome_alea(){
 		// }
 
 	}
+	uint8_t color=0;
+	uint8_t i=0;
+	for (i=0;i<GENOMEPARAM-1; i++){
+        color += mydata->genome[i]*pow(2,i);
+    }
+  color+=mydata->genome[GENOMEPARAM-1];
+  set_color(color);
 	mydata->last_genome_update=kilo_ticks;
 	mydata->nb_genome=0;//reset des genomes recus
 	setup_message();
 }
 
 int fitness(){
-	return fitness2();
+	// return fitness2();
 	int i;
 	int fit=0;
 	for (i=0;i<TIMEUPDATE;i++){
 		fit+=mydata->last_fitness[i];
 	}
-	if (bienmange()){
-		fit*=2;
-	}
+	// if (bienmange()){
+	// 	fit*=2;
+	// }
 	if (mydata->dead==1){
 		return 255;
 	}
@@ -158,6 +174,9 @@ int fitness(){
 }
 
 int fitness2(){//fitness d'aglomération
+if (mydata->dead==1){
+	return 255;
+}
 	int i=0;
 	uint32_t fit=mydata->nb_voisins;
 	for(;i<mydata->nb_voisins;i++){
@@ -187,24 +206,30 @@ int bienmange(){
 void loop() {
 	//52 loop par secondes sur simulateur
 //TEST
-	// if (kilo_ticks%(60*SECONDE)==0 && mydata->ecrire==1){
-	// 	fprintf(mydata->fichier, "%d\n",mydata->dead );
-	// 	// if(mydata->dead){
-	// 	// 	fprintf(mydata->fichier, "%d\n",-1 );
-	// 	// }else{
-	// 	// 	fprintf(mydata->fichier, "%d\n",mydata->parent );
-	// 	// }
-	// 	// if(mydata->dead){
-	// 	// 	fprintf(mydata->fichier, "%d\n",-1 );
-	// 	// }else{
-	// 	// 	fprintf(mydata->fichier, "%d%d%d%d%d%d%d%d\n",mydata->genome[0],mydata->genome[1],mydata->genome[2],mydata->genome[3],mydata->genome[4],mydata->genome[5],mydata->genome[6],mydata->genome[7] );
-	// 	// }
-	//
-	// 	mydata->ecrire=0;
-	// }
-// if (kilo_ticks%SECONDE==1){
-// 	mydata->ecrire=1;
-// }
+	if (kilo_ticks%(60*SECONDE)==0 && mydata->ecrire==1){
+		// fprintf(mydata->fichier, "%d\n",mydata->dead );
+		// if(mydata->dead){
+		// 	fprintf(mydata->fichier, "%d\n",-1 );
+		// }
+		// else{
+		// 	fprintf(mydata->fichier, "%d\n",mydata->parent );
+		// }
+		if(mydata->dead){
+			fprintf(mydata->fichier, "%d\n",-1 );
+		}else{
+			// printf("%d\n",kilo_uid );
+			// printf("%d%d%d%d%d%d%d%d\n",mydata->genome[0],mydata->genome[1],mydata->genome[2],mydata->genome[3],mydata->genome[4],mydata->genome[5],mydata->genome[6],mydata->genome[7]);
+			fprintf(mydata->fichier, "%d%d%d%d%d%d%d%d\n",mydata->genome[0],mydata->genome[1],mydata->genome[2],mydata->genome[3],mydata->genome[4],mydata->genome[5],mydata->genome[6],mydata->genome[7] );
+
+			// printf("%d\n",kilo_uid );
+}
+
+		mydata->ecrire=0;
+		// printf("%d\n",kilo_uid );
+	}
+if (kilo_ticks%SECONDE==1){
+	mydata->ecrire=1;
+}
 
 	if (isfood(kilo_uid)){
 	set_color(RGB(3,3,0));
@@ -286,25 +311,51 @@ char *botinfo(void)
 {
   int i;
   char *p = botinfo_buffer;
-  p+= sprintf (p, "ID: %d \n", kilo_uid);
+  p+= sprintf (p, "ID: %d ", kilo_uid);
 
   // p+= sprintf (p, "move: %d wait:%d turn:%d\n", mydata->move, mydata->wait, mydata->turn);
-  p+= sprintf (p, "genome: [%d,%d,%d,%d,%d,%d,%d,%d]  fitness: %d parent:%d ",
+	if(isfood(kilo_uid)){
+		p+=sprintf(p,"EMISSION");
+		return botinfo_buffer;
+	}
+	if(mydata->dead){
+		p+=sprintf(p," DEAD \n");
+		return botinfo_buffer;
+	}
+  p+= sprintf (p, "genome: [%d,%d,%d,%d,%d,%d,%d,%d]  fitness: %d parent:%d \n\n",
 	       mydata->genome[0],mydata->genome[1],mydata->genome[2],mydata->genome[3],mydata->genome[4],mydata->genome[5],mydata->genome[6],mydata->genome[7],fitness(),mydata->parent );
 
-  p += sprintf (p, "%d neighbors: \n", mydata->nb_voisins);
-	p+= sprintf(p,"%d genomes : ",mydata->nb_genome);
+  p += sprintf (p, "%d neighbors: ", mydata->nb_voisins);
+	for(i=0; i<mydata->nb_voisins;i++)
+			p+=sprintf(p, "[id : %d, dist : %d, time : %d ]\n",mydata->voisins_liste[i].id,mydata->voisins_liste[i].dist,kilo_ticks-mydata->voisins_liste[i].timestamp);
+
+	p+= sprintf(p,"\n%d genomes : ",mydata->nb_genome);
   for (i = 0; i < mydata->nb_genome; i++)
     //    p += sprintf (p, "%d ", mydata->neighbors[i].ID);
-    p += sprintf (p, "[id : %d,fit : %d]", mydata->genome_list[i].id, mydata->genome_list[i].fitness);
+    p += sprintf (p, "[id : %d,fit : %d]\n ", mydata->genome_list[i].id, mydata->genome_list[i].fitness);
+
+
 
 
   return botinfo_buffer;
 }
 
-#define MUR 1500
+#define MUR 500
 
 int16_t callback_obstacles(double x, double y, double *m1, double *m2){
+
+	//CERCLE
+	if(x*x + y*y >= MUR*MUR){
+			*m1 = (x<0)? 1:-1;
+			*m2 =  (y<0)? 1:-1;
+			return 1;
+	}
+	else{
+			return 0;
+	}
+
+//CARRE
+
     if (x > MUR || x< -MUR || y>MUR|| y<-MUR){
       if(x>MUR || x<-MUR){
         *m1 = (x<0)? 1:-1;

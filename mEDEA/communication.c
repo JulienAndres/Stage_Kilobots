@@ -15,7 +15,7 @@ void update_voisins(){
 	for(i=mydata->nb_voisins-1;i>=0;i--){
 		if (kilo_ticks-mydata->voisins_liste[i].timestamp > SECONDE){
 		// if (kilo_uid==83)	printf("delete %d\n",mydata->voisins_liste[i].id );
-			mydata->voisins_liste[i]=mydata->voisins_liste[mydata->nb_voisins];
+			mydata->voisins_liste[i]=mydata->voisins_liste[mydata->nb_voisins-1];
 			mydata->voisins_liste[mydata->nb_voisins-1].id=-1;
 
 			mydata->nb_voisins--;

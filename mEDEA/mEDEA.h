@@ -6,9 +6,9 @@
     #define GENOMEPARAM 8
     #define MAXROBOT 100
     #define TIMEUPDATE 40
-    #define IDFOOD  0,1,2,3
-    #define NBFOOD 4
-    #define PROBA_MUTATION 0.0000
+    #define IDFOOD  0,1,2,3,4,5,6
+    #define NBFOOD 7
+    #define PROBA_MUTATION 0.4
 
 void setup();
 void genome_alea();
