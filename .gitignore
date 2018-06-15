@@ -1,3 +1,4 @@
-/mEDEA/stats_robot/[0-9]*
 
-
+/mEDEA/stats_robot/*
+!/mEDEA/stats_robot/*.mp4
+!/mEDEA/stats_robot/*.py
