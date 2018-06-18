@@ -4,10 +4,10 @@
 # configured below, these needs to be adapted to the system.
 
 #list of c files in this project
-SOURCES=evite.c communication.c movement.c
+SOURCES=aggregation.c communication.c movement.c proba.c
 
 #name of the executable file
-EXECUTABLE=evite
+EXECUTABLE=aggregation
 
 # Path to the official kilolib, used for real bots only
 # Set it here, or as an environment variable in the shell:

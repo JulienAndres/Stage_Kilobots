@@ -1,6 +1,7 @@
 #include <kilombo.h>
 
 #include "aggregation.h"
+#include "proba.h"
 #include "movement.h"
 #include "communication.h"
 
@@ -26,7 +27,15 @@ void setup() {
   mydata->last_motion_update=kilo_ticks;
   set_random_direction();
   mydata->delai=1;
+  mydata->state=SEARCHING;
 
+  //AGGREGATION
+  mydata->toAggregate.dist=-1;
+  mydata->toAggregate.nb_voisins=0;
+  mydata->last_dist_update=-1;
+
+  //REPELLING
+  mydata->start_repelling=0;
   return;
 }
 
@@ -42,22 +51,103 @@ void loop(){
 
   if(kilo_ticks>mydata->last_motion_update+mydata->delai*SECONDE){
     mydata->last_motion_update=kilo_ticks;
-    evitement_obstacle();
+
+    switch (mydata->state) {
+      case SEARCHING:
+        evitement_obstacle();
+        break;
+      case CONVERGING:
+        converging();
+        break;
+      case SLEEPING:
+        sleeping();
+        break;
+      case REPELLING:
+        repelling();
+        break;
+    }
   }
   return;
 }
 
-void plan_manager(){
+void repelling(){
+  set_color(RGB(1,1,1));
+  if(kilo_ticks>mydata->start_repelling + 10*SECONDE){
+    mydata->state=SEARCHING;
+  }
+  //makeJoinDecision();
+  if (!mydata->nb_voisins){
+    mydata->state=SEARCHING;
+  }else{
+    if(mydata->toAggregate.dist <= mydata->last_dist_update){
+      switch (mydata->curr_motion) {
+        case RIGHT:
+          set_motion(LEFT);
+          break;
+        case LEFT:
+          set_motion(RIGHT);
+          break;
+        case STRAIGHT:
+        default:
+          set_random_turning_direction();
+          break;
+      }
+    }
+
+    mydata->last_dist_update = mydata->toAggregate.dist;
+  }
+
+
   return;
 }
 
+void sleeping(){
+  set_color(RGB(0,0,1));
+  set_motion(STOP);
+  if(!is_too_close()){
+    mydata->state = SEARCHING;
+  }
+  makeLeaveDecision();
+}
+
 void converging(){
+  set_color(RGB(0,1,0));
+  if(is_too_close()){
+    mydata->state = SLEEPING;
+    set_motion(STOP);
+  } else {
+    if(mydata->toAggregate.dist >= mydata->last_dist_update){
+      switch (mydata->curr_motion) {
+        case RIGHT:
+          set_motion(LEFT);
+          break;
+        case LEFT:
+          set_motion(RIGHT);
+          break;
+        case STRAIGHT:
+        default:
+          set_random_turning_direction();
+          break;
+      }
+    }
+    if(!hasBestNeighbor()){
+      mydata->state = SEARCHING;
+    }
+    mydata->last_dist_update = mydata->toAggregate.dist;
+  }
 
 }
 
 void evitement_obstacle(){
   /* Evitement mur
     sinon marche random */
+    if(hasBestNeighbor()){
+      mydata->state=CONVERGING;
+      set_motion(STRAIGHT);
+      mydata->last_dist_update=mydata->toAggregate.dist;
+      return;
+    }
+
   uint8_t mur=hasMur();
   if(mur){
     if(mur<=mydata->last_mur_dist){
@@ -113,6 +203,11 @@ uint8_t is_too_close(){
 	return 0;
 }
 
+uint8_t is_too_close1(){
+    if (mydata->toAggregate.dist<=DIST_TO_AGGREGATE) return 1;
+    return 0;
+}
+
 uint8_t hasBestNeighbor(){
 //A REVOIR
 /*
@@ -125,8 +220,9 @@ uint8_t hasBestNeighbor(){
 		if(!mydata->nb_voisins){
 			return 0;
 		}
+    if(kilo_ticks-mydata->toAggregate.timestamp > SECONDE) mydata->toAggregate.nb_voisins=0;
     for (i = mydata->nb_voisins-1; i >= 0; i--) {
-        if (mydata->voisins_liste[i].nb_voisins >= mydata->toAggregate.nb_voisins && mydata->voisins_liste[i].id!=IDOBSTACLE){
+        if (mydata->voisins_liste[i].nb_voisins >= mydata->toAggregate.nb_voisins){
             mydata->toAggregate = mydata->voisins_liste[i];
         }
     }
@@ -142,6 +238,7 @@ Initialise callback et lance la main loop
     kilo_message_rx = message_rx;
     kilo_message_tx = message_tx;
 		SET_CALLBACK(botinfo, botinfo);
+    SET_CALLBACK(obstacles, callback_obstacles);
 
 		kilo_start(setup, loop);
 
@@ -152,13 +249,45 @@ Initialise callback et lance la main loop
 
 #ifdef SIMULATOR
 
+
+#define MUR 5000
+
+int16_t callback_obstacles(double x, double y, double *m1, double *m2){
+
+	//CERCLE
+	if(x*x + y*y >= MUR*MUR){
+			*m1 = (x<0)? 1:-1;
+			*m2 =  (y<0)? 1:-1;
+			return 1;
+	}
+	else{
+			return 0;
+	}
+
+//CARRE
+
+    if (x > MUR || x< -MUR || y>MUR|| y<-MUR){
+      if(x>MUR || x<-MUR){
+        *m1 = (x<0)? 1:-1;
+      }
+      if (y>MUR || y<-MUR){
+        *m2 = (y<0)? 1:-1;
+      }
+
+      return 1;
+    }
+
+    return 0;
+}
+
+
 static char botinfo_buffer[10000000];
 // provide a text string for the status bar, about this bot
 char *botinfo(void)
 {
   int i;
   char *p = botinfo_buffer;
-  p+= sprintf (p, "ID: %d ", kilo_uid);
+  p+= sprintf (p, "ID: %d state %d", kilo_uid,mydata->state);
 
   // p+= sprintf (p, "move: %d wait:%d turn:%d\n", mydata->move, mydata->wait, mydata->turn);
 

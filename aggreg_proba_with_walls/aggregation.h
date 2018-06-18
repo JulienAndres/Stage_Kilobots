@@ -1,24 +1,36 @@
-#ifndef EVITE
-    #define EVITE
+#ifndef AGGREGATION
+    #define AGGREGATION
 
     #define SECONDE 32
     #define MAXVOISIN 30
     #define IDOBSTACLE 0
     #define DISTOBSTACLE 70 //pour une intensité de 24V
+    #define DIST_TO_AGGREGATE 50
+    #define CLUSTER_SIZE 6
 
     //setup && loop
-    void setup();
-    void loop();
-    int main();
+    void setup(void);
+    void loop(void);
+    int main(void);
 
     //behaviour
-    void evitement_obstacle();
+    void evitement_obstacle(void);
+    void repelling(void);
+    void sleeping(void);
+    void converging(void);
 
     //utilities
-    uint8_t hasMur();
-    uint8_t isMur();
+    uint8_t hasMur(void);
+    uint8_t isMur(int);
+    uint8_t is_too_close(void);
+    uint8_t is_too_close1(void);
+    uint8_t hasBestNeighbor(void);
 
-
+    //SIMULATOR
+    #ifdef SIMULATOR
+    char *botinfo(void);
+    int16_t callback_obstacles(double x, double y, double *m1, double *m2);
+    #endif
 
     typedef struct {
       uint8_t dist;
@@ -50,6 +62,16 @@
       uint8_t curr_motion;
       uint32_t delai;
 
+      //STATE OF ROBOT
+      uint8_t state;
+
+      //GESTION AGGREGATION
+      Neighbor_t toAggregate;
+      uint8_t last_dist_update;
+
+      //GESTION REPELLING
+      uint32_t start_repelling;
+
     } USERDATA;
 
     enum motion {
@@ -67,6 +89,5 @@
     };
 
 
-    char *botinfo(void);
 
 #endif
