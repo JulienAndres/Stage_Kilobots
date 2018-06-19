@@ -104,7 +104,7 @@ void repelling(){
 void sleeping(){
   set_color(RGB(0,0,1));
   set_motion(STOP);
-  if(!is_too_close()){
+  if(!is_too_close1()){
     mydata->state = SEARCHING;
   }
   makeLeaveDecision();
@@ -112,7 +112,7 @@ void sleeping(){
 
 void converging(){
   set_color(RGB(0,1,0));
-  if(is_too_close()){
+  if(is_too_close1()){
     mydata->state = SLEEPING;
     set_motion(STOP);
   } else {
@@ -204,6 +204,15 @@ uint8_t is_too_close(){
 }
 
 uint8_t is_too_close1(){
+  int i=0;
+  int cpt=0;
+  for(;i<mydata->nb_voisins;i++){
+    if(mydata->voisins_liste[i].dist <= DIST_TO_AGGREGATE) cpt++;
+  }
+  return (cpt>=mydata->nb_voisins/3)? 1:0;
+
+
+
     if (mydata->toAggregate.dist<=DIST_TO_AGGREGATE) return 1;
     return 0;
 }
@@ -250,7 +259,7 @@ Initialise callback et lance la main loop
 #ifdef SIMULATOR
 
 
-#define MUR 5000
+#define MUR 500
 
 int16_t callback_obstacles(double x, double y, double *m1, double *m2){
 
@@ -295,7 +304,7 @@ char *botinfo(void)
 	for(i=0; i<mydata->nb_voisins;i++)
 			p+=sprintf(p, "[id : %d, dist : %d, time : %d ]\n",mydata->voisins_liste[i].id,mydata->voisins_liste[i].dist,kilo_ticks-mydata->voisins_liste[i].timestamp);
   p+=sprintf(p,"\nhas mur %d last update mur %d delai : %d\n",hasMur(),mydata->mur_update,mydata->delai);
-
+  p+=sprintf(p,"%d",__LINE__);
   return botinfo_buffer;
 }
 
