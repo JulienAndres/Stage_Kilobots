@@ -40,7 +40,7 @@ void loop(){
   if(mydata->new_message) update_from_message();
   setup_message();
 
-  if(kilo_ticks>mydata->last_motion_update+mydata->delai*SECONDE){
+  if(kilo_ticks>mydata->last_motion_update+mydata->delai*16){
     mydata->last_motion_update=kilo_ticks;
     evitement_obstacle();
   }
@@ -76,6 +76,7 @@ void evitement_obstacle(){
     set_random_direction();
     mydata->last_mur_dist=-1;
   }
+  if(mydata->delai>3  ) mydata->delai = 3;
 }
 
 
