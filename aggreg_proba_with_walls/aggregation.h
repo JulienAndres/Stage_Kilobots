@@ -8,6 +8,9 @@
     #define DIST_TO_AGGREGATE 50
     #define CLUSTER_SIZE 6
 
+    #define isMur(id) ((id==IDOBSTACLE)?1:0 )
+
+
     //setup && loop
     void setup(void);
     void loop(void);
@@ -85,8 +88,13 @@
     SEARCHING,             /*!< The robot is searching for an other robot */
     CONVERGING,          /*!< The robot is moving to a neighbor */
     SLEEPING,               /*!< The robot is sleeping */
-    REPELLING
+    REPELLING,
+    ROTATION,
+    ESCAPE,
+    INIT
     };
+
+
 
 
 

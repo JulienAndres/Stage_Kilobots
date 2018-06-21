@@ -49,7 +49,11 @@ void loop(){
   if(mydata->new_message) update_from_message();
   setup_message();
 
-  if(kilo_ticks>mydata->last_motion_update+mydata->delai*SECONDE){
+  if(mydata->state==SEARCHING){
+    evitement_obstacle();
+    return;
+  }
+  if(kilo_ticks>mydata->last_motion_update+SECONDE){
     mydata->last_motion_update=kilo_ticks;
 
     switch (mydata->state) {
@@ -138,7 +142,84 @@ void converging(){
 
 }
 
-void evitement_obstacle(){
+void evitement_obstacle()
+{
+  switch(mydata->state2){
+    case SEARCHING:
+    //printf("SEARCHING\n");
+      set_color(RGB(0,1,1));
+      RB_init();
+      if(kilo_ticks > mydata->last_motion_update + SECONDE){
+        mydata->last_motion_update=kilo_ticks;
+        set_random_direction();
+        if(mydata->wall_detected == 1){
+          mydata->wall_detected = 0;
+          mydata->state2 = INIT;
+        }
+      }
+    break;
+
+    case ROTATION:
+    //printf("ROTATION\n");
+    set_color(RGB(1,0,0));
+    if(kilo_ticks > mydata->rotation_timer){
+      mydata->rotation_timer = kilo_ticks + 7*SECONDE;
+      if(mydata->curr_motion == LEFT){
+        set_motion(RIGHT);
+      } else {
+        set_motion(LEFT);
+      }
+      RB_init();
+      mydata->x_old = 0;
+      mydata->x_new = 0;
+
+      set_color(RGB(1,0,1));
+    }
+    if(mydata->wall_detected == 1){
+      mydata->wall_detected = 0;
+      if(mydata->x_old < mydata->x_new){
+        if(mydata->curr_motion != STRAIGHT){
+          set_motion(STRAIGHT);
+          //set_motors(kilo_straight_left, kilo_straight_right);
+        }
+        printf("motion avant : %d\n", mydata->curr_motion);
+        set_color(RGB(1,1,1));
+        mydata->state2 = ESCAPE;
+        printf("TO ESCAPE\n");
+      }
+    }
+    break;
+
+    case ESCAPE:
+      if(mydata->wall_detected == 1){
+        mydata->wall_detected = 0;
+        printf("il rentre là dedans");
+        printf("motion : %d\n", mydata->curr_motion);
+        if(mydata->x_old > mydata->x_new){
+          mydata->state = INIT;
+        }
+      }
+      break;
+
+    case INIT:
+    //printf("INIT\n");
+      set_random_turning_direction();
+      RB_init();
+      mydata->rotation_timer = kilo_ticks + 7*SECONDE;
+      set_color(RGB(1,1,1));
+      mydata->state2 = ROTATION;
+      break;
+
+  }
+}
+
+
+
+
+
+
+
+void evitement_obstacle2(){
   /* Evitement mur
     sinon marche random */
     if(hasBestNeighbor()){
@@ -183,10 +264,6 @@ uint8_t hasMur(){
   if(kilo_ticks>mydata->mur_update+SECONDE) return 0;
   if(mydata->mur_dist>DISTOBSTACLE) return 0;
   return mydata->mur_dist;
-}
-
-uint8_t isMur(int ID){
-  return ID==IDOBSTACLE;
 }
 
 uint8_t is_too_close(){

@@ -7,7 +7,7 @@
     #define MAXROBOT 100
     #define TIMEUPDATE 40
     #define IDFOOD 99
-    #define PROBA_MUTATION 0
+    #define PROBA_MUTATION 0.1
     #define IDOBSTACLE 0
 
     #define isMur(id) ((id==IDOBSTACLE)?1:0 )

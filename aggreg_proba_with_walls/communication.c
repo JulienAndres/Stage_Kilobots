@@ -20,16 +20,27 @@ void update_voisins(){
 }
 
 
-void update_mur_from_message(){
-	mydata->mur_dist=mydata->message_dist;
-	mydata->mur_update=kilo_ticks;
-	mydata->new_message=0;
+void compute_wall_mean(){
+	mydata->x_old = mydata->x_new;
+	mydata->x_new = 0;
+	int i = 0;
+	for(i=0; i<RB_SIZE; i++){
+		//mydata->x_new += estimate_distance(&mydata->RXBuffer[i].dist);
+		printf("BUFFER%d : %d\n", i, estimate_distance(&mydata->RXBuffer[i].dist));
+		distance_measurement_t dist = RB_front().dist;
+		mydata->x_new += estimate_distance(&dist);
+		//RB_popfront();
+
+	}
+	mydata->x_new /= 4;
+	printf("x_old : %d, x_new : %d\n",mydata->x_old, mydata->x_new);
+	RB_init();
 }
 
 void update_from_message(){
 	int ID=mydata->message.data[0];
 
-	if(isMur(ID)) return update_mur_from_message();
+	// if(isMur(ID)) return update_mur_from_message();
 
 	uint8_t found_id=0;
 	uint32_t distance=mydata->message_dist;
@@ -58,9 +69,24 @@ void update_from_message(){
 	mydata->new_message=0;
 }
 
+void rxbuffer_push(message_t *msg, distance_measurement_t *dist){
 
+		mydata->wall_detected_timeout = kilo_ticks + 64;
+    received_message_t *rmsg = &RB_back();
+    rmsg->msg = *msg;
+    rmsg->dist = *dist;
+    RB_pushback();
+		// printf("Head : %d, Tail : %d, Size : %d\n", mydata->RXHead, mydata->RXTail, RB_SIZE);
+		if(mydata->RXHead == (mydata->RXTail)+1%RB_SIZE){ //RB_full()
+			// printf("rb full\n");
+			compute_wall_mean();
+		}
+		mydata->wall_detected = 1;
+}
 
 void message_rx (message_t *message, distance_measurement_t *distance){
+	if(isMur(message->data[0])) return rxbuffer_push(message,distance);
+
     mydata->new_message = 1;
 		mydata->message=*message;
 		mydata->message_dist=estimate_distance(distance);
