@@ -77,48 +77,48 @@ for i in range(DUREE):
 
 fig = plt.figure()
 ax=plt.subplot(111)
-ims=[]
-d=17
-#for d in range(1):
-try:
-    a=[i if hist[d].keys()[i]!=-1 else -1 for i in range(len(hist[d].values()))]
-    im2=ax.bar([-1],hist[d].values()[a.index(-1)],color='red')
-    hist[d].pop(-1)
-except ValueError:
-    pass
-
-a=[i if hist[d].keys()[i]!=-1 else -1 for i in range(len(hist[d].values()))]
-im=ax.bar(a, hist[d].values(), 
-                color='black')
-
-
-
-plt.show() 
+#ims=[]
+#d=17
+##for d in range(1):
+#try:
+#    a=[i if hist[d].keys()[i]!=-1 else -1 for i in range(len(hist[d].values()))]
+#    im2=ax.bar([-1],hist[d].values()[a.index(-1)],color='red')
+#    hist[d].pop(-1)
+#except ValueError:
+#    pass
+#
+#a=[i if hist[d].keys()[i]!=-1 else -1 for i in range(len(hist[d].values()))]
+#im=ax.bar(a, hist[d].values(), 
+#                color='black')
+#
+#
+#
+#plt.show() 
     
 #    ims.append(im)
 
 #ani = animation.ArtistAnimation(fig, ims, interval=400)
 #ani.save('dynamic_images.mp4')
 
-#ax2=plt.subplot(111)
-#ax.set_xticklabels([])
-#ax.set_yticklabels([])
-#ims=[]
-#
-#for i in range(DUREE):
-#    im=plt.imshow(toRet[i],  cmap='gray_r' )
-#    title = ax.text(0.5,1.05,"Nb Kilobot vivant {} Generation {}".format(nbvivant(toRet[i]),i), 
-#                    size=plt.rcParams["axes.titlesize"],
-#                    ha="center", transform=ax.transAxes, )
+ax2=plt.subplot(111)
+ax.set_xticklabels([])
+ax.set_yticklabels([])
+ims=[]
+
+for i in range(DUREE):
+    im=plt.imshow(toRet[i],  cmap='gray_r' )
+    title = ax.text(0.5,1.05,"Nb Kilobot vivant {} Generation {}".format(nbvivant(toRet[i]),i), 
+                    size=plt.rcParams["axes.titlesize"],
+                    ha="center", transform=ax.transAxes, )
 #    rects = ax2.bar(np.arange(len(hist[i])), hist[i].values(), 
 #                color='black')
-##    plt.title(" Kilobots vivants , iteration"+str(i))
-#    ims.append([im,title,rects])
-#
-#
-#ani = animation.ArtistAnimation(fig, ims, interval=400)
-#
-#ani.save('dynamic_images.mp4')
+#    plt.title(" Kilobots vivants , iteration"+str(i))
+    ims.append([im,title])
+
+
+ani = animation.ArtistAnimation(fig, ims, interval=400)
+
+ani.save('dynamic_images.mp4')
 
 plt.show()
 

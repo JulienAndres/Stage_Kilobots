@@ -4,7 +4,7 @@
     #define SECONDE 32
     #define MAXVOISIN 30
     #define GENOMEPARAM 10
-    #define MAXROBOT 30
+    #define MAXROBOT 100
     #define TIMEUPDATE 40
     #define IDFOOD 99
     #define PROBA_MUTATION 0.1
@@ -34,11 +34,6 @@ void share_genome_forbiden();
 void update_fitness();
 int arrondi(double n);
 uint8_t hasMur(void);
-int16_t callback_obstacles();
-
-
-//test
-char *botinfo(void);
 
     typedef struct {
       uint8_t dist;
@@ -86,11 +81,6 @@ char *botinfo(void);
       uint8_t mur_dist;
       uint8_t last_mur_dist;
       uint32_t mur_update;
-
-
-      //test
-      uint8_t moteur_d;
-      uint8_t moteur_g;
 
     } USERDATA;
 

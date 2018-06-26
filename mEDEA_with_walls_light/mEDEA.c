@@ -39,6 +39,7 @@ void setup() {
 	mydata->mur_dist=-1;
 	mydata->last_mur_dist=-1;
 	mydata->mur_update=0;
+	mydata->last_light=500;
 	int i=0;
 	for(i=0;i<TIMEUPDATE;i++){
 		mydata->last_fitness[i]=0;
@@ -107,16 +108,8 @@ void genome_alea(){
 	setup_message();
 }
 
-int fitness(){
-	int i;
-	int fit=0;
-	for (i=0;i<TIMEUPDATE;i++){
-		fit+=mydata->last_fitness[i];
-	}
-	if (mydata->dead==1){
-		return 255;
-	}
-	return fit;
+uint16_t fitness(){
+	return is_feed();
 }
 
 
@@ -312,10 +305,14 @@ void update_from_message(){
 		mydata->genome_list[i].fitness=mydata->message.data[8];
 		mydata->new_message=0;
 }
-
+//WORK
 void setup_message_fitness(){
 	mydata->broadcast=0;//ne pas transmettre quand on change le message
-	mydata->msg_transmis.data[8]=fitness();
+	uint16_t fit=fitness();
+
+	mydata->msg_transmis.data[8]=fit%100;
+	mydata->msg_transmis.data[7]=fit/100;
+	if(mydata->dead) mydata->msg_transmis.data[8]=255;
 	mydata->msg_transmis.crc = message_crc(&mydata->msg_transmis);
 	mydata->broadcast=1;
 	return;
@@ -380,14 +377,12 @@ void setup_message(){
 	return;
 }
 
-int is_feed(){
-	int i;
-	for( i=0;i<mydata->nb_voisins;i++){
-		if(mydata->voisins_liste[i].id==IDFOOD){
-			return 1;
-		}
+uint16_t is_feed(){
+	uint16_t toRet=get_ambientlight();
+	while(toRet==-1){
+		toRet=get_ambientlight();
 	}
-	return 0;
+	return toRet;
 }
 
 uint8_t hasMur(){
@@ -441,7 +436,7 @@ char *botinfo(void)
 {
   int i;
   char *p = botinfo_buffer;
-  p+= sprintf (p, "ID: %d ", kilo_uid);
+  p+= sprintf (p, "ID: %d fit : %d light : %d\n", kilo_uid,fitness(),get_ambientlight());
 
   // p+= sprintf (p, "move: %d wait:%d turn:%d\n", mydata->move, mydata->wait, mydata->turn);
 
@@ -460,9 +455,6 @@ char *botinfo(void)
   for (i = 0; i < mydata->nb_genome; i++)
     //    p += sprintf (p, "%d ", mydata->neighbors[i].ID);
     p += sprintf (p, "[id : %d,fit : %d]\n ", mydata->genome_list[i].id, mydata->genome_list[i].fitness);
-
-
-
 
   return botinfo_buffer;
 }

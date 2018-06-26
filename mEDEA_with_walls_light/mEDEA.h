@@ -7,7 +7,7 @@
     #define MAXROBOT 30
     #define TIMEUPDATE 40
     #define IDFOOD 99
-    #define PROBA_MUTATION 0.1
+    #define PROBA_MUTATION 0.7
     #define IDOBSTACLE 0
 
     #define isMur(id) ((id==IDOBSTACLE)?1:0 )
@@ -16,11 +16,11 @@ void setup();
 void genome_alea();
 void loop();
 int main();
-int fitness();
+uint16_t fitness();
 void set_motion(uint8_t motion);
 void genome_motion();
 void update_voisins();
-int is_feed();
+uint16_t is_feed();
 void emission();
 void update_only_voisins_from_message();
 void update_from_message();
@@ -86,6 +86,8 @@ char *botinfo(void);
       uint8_t mur_dist;
       uint8_t last_mur_dist;
       uint32_t mur_update;
+
+      uint16_t last_light;
 
 
       //test

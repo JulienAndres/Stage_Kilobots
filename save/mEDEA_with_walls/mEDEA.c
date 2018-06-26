@@ -211,15 +211,6 @@ void genome_motion(){//controlleur
 	int real_d=arrondi((kilo_turn_right-(kilo_turn_right-20))*moteur_d)+(kilo_turn_right-20);
 	//spinup_motors();
 
-	if((real_d-real_g)>7){
-		real_g=real_d-7;
-	}else if((real_g-real_d)>7){
-		real_d=real_g-7;
-	}
-
-	mydata->moteur_d=real_d;
-	mydata->moteur_g=real_g;
-
 	//printf("KTL : %d, KTR : %d\n", kilo_turn_left, kilo_turn_right);
 	//printf("MOTOR_G : %d  MOTOR_D : %d\n",real_g, real_d);
 	set_motors(real_g, real_d);
@@ -423,78 +414,6 @@ Initialise callback et lance la main loop
     kilo_message_rx = message_rx;
     kilo_message_tx = message_tx;
 		kilo_message_tx_success = message_tx_success;
-
-		SET_CALLBACK(botinfo, botinfo);
-		SET_CALLBACK(obstacles, callback_obstacles);
-
 		kilo_start(setup, loop);
     return 0;
 }
-
-
-
-#ifdef SIMULATOR
-
-static char botinfo_buffer[10000000];
-// provide a text string for the status bar, about this bot
-char *botinfo(void)
-{
-  int i;
-  char *p = botinfo_buffer;
-  p+= sprintf (p, "ID: %d ", kilo_uid);
-
-  // p+= sprintf (p, "move: %d wait:%d turn:%d\n", mydata->move, mydata->wait, mydata->turn);
-
-	if(mydata->dead){
-		p+=sprintf(p," DEAD \n");
-		return botinfo_buffer;
-	}
-  p+= sprintf (p, "genome: [%d,%d,%d,%d,%d,%d,%d,%d,%d,%d], m_g %d m_d %d \n\n",
-	       mydata->genome[0],mydata->genome[1],mydata->genome[2],mydata->genome[3],mydata->genome[4],mydata->genome[5],mydata->genome[6],mydata->genome[7],mydata->genome[8],mydata->genome[8],mydata->moteur_g,mydata->moteur_d);
-
-  p += sprintf (p, "%d neighbors: ", mydata->nb_voisins);
-	for(i=0; i<mydata->nb_voisins;i++)
-			p+=sprintf(p, "[id : %d, dist : %d, time : %d ]\n",mydata->voisins_liste[i].id,mydata->voisins_liste[i].dist,kilo_ticks-mydata->voisins_liste[i].timestamp);
-
-	p+= sprintf(p,"\n%d genomes : ",mydata->nb_genome);
-  for (i = 0; i < mydata->nb_genome; i++)
-    //    p += sprintf (p, "%d ", mydata->neighbors[i].ID);
-    p += sprintf (p, "[id : %d,fit : %d]\n ", mydata->genome_list[i].id, mydata->genome_list[i].fitness);
-
-
-
-
-  return botinfo_buffer;
-}
-
-#define MUR 500
-
-int16_t callback_obstacles(double x, double y, double *m1, double *m2){
-
-	//CERCLE
-	if(x*x + y*y >= MUR*MUR){
-			*m1 = (x<0)? 1:-1;
-			*m2 =  (y<0)? 1:-1;
-			return 1;
-	}
-	else{
-			return 0;
-	}
-
-//CARRE
-
-    if (x > MUR || x< -MUR || y>MUR|| y<-MUR){
-      if(x>MUR || x<-MUR){
-        *m1 = (x<0)? 1:-1;
-      }
-      if (y>MUR || y<-MUR){
-        *m2 = (y<0)? 1:-1;
-      }
-
-      return 1;
-    }
-
-    return 0;
-}
-
-#endif

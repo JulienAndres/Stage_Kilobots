@@ -1,7 +1,7 @@
 {
 	"distributePercent" : 1,
 	"seed" : 100,
-    "nBots" : 500,
+    "nBots" : 70,
 		"_simulationTime" : 12000,
     "commsRadius" : 100,
     "showCommsRadius" : 0,
