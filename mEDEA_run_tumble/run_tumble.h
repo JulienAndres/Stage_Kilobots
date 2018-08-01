@@ -7,6 +7,7 @@
   #define NBFITNESS 40
   #define DIST_OBSTACLE 80
 
+ #define PROBA (rand()%32767)
 
 
   void setup(void);
@@ -24,6 +25,7 @@
   {
     uint8_t id;
     uint32_t proba;
+    uint16_t fitness;
   }Genome_t;
 
 
@@ -52,10 +54,19 @@
 
     uint32_t proba_update;
 
-    // #ifdef SIMULATOR
+    uint16_t cpt_msg;
+
+    #ifdef SIMULATOR
     // FILE* fichier;
     // uint8_t ecrire;
-    // #endif
+    //
+
+    FILE* fichier;
+    uint8_t ecrire;
+
+    FILE* fichier2;
+    uint8_t ecrire2;
+    #endif
 
   } USERDATA;
 

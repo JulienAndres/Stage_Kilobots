@@ -15,7 +15,8 @@ void setup()
   mydata->state=GO;
   mydata->turntimer=rand_hard()%4;
 
-  mydata->proba=32700;
+  mydata->proba=(rand()%32767);
+  mydata->proba=PROBA;
   printf("%d\n",mydata->proba );
 
 }

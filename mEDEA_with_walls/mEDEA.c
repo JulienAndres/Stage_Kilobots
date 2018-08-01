@@ -207,8 +207,8 @@ void genome_motion(){//controlleur
 
 	moteur_g=1.0/(1.0+exp(-moteur_g));
 	moteur_d=1.0/(1.0+exp(-moteur_d));
-	int real_g=arrondi((kilo_turn_left-(kilo_turn_left-20))*moteur_g)+(kilo_turn_left-20); //60 pour la vitesse minimale
-	int real_d=arrondi((kilo_turn_right-(kilo_turn_right-20))*moteur_d)+(kilo_turn_right-20);
+	int real_g=arrondi((kilo_turn_left-(kilo_turn_left-15))*moteur_g)+(kilo_turn_left-15); //60 pour la vitesse minimale
+	int real_d=arrondi((kilo_turn_right-(kilo_turn_right-15))*moteur_d)+(kilo_turn_right-15);
 	//spinup_motors();
 
 	if((real_d-real_g)>7){

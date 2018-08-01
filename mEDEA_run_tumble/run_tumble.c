@@ -23,8 +23,8 @@ void setup()
   mydata->curr_motion=-1;
   mydata->state=GO;
   mydata->turntimer=rand_hard()%4;
-  mydata->proba=rand()%1000;//pour simuateur
-  // mydata->proba=275;
+  mydata->proba=rand()%32767;//pour simuateur
+  // mydata->proba=800;
   // mydata->proba=RAND_MAX-2*rand_hard();
   printf("%d\n",mydata->proba );
 
@@ -35,6 +35,7 @@ void setup()
   }
   setup_message();
   mydata->dead=0;
+  mydata->cpt_msg=0;
   mydata->broadcast=1;
   mydata->new_message=0;
   mydata->last_genome_update=kilo_ticks;
@@ -48,7 +49,24 @@ void setup()
   //  mydata->fichier=fopen(name,"w");
   //  mydata->ecrire=1;
   //  #endif
+  #ifdef SIMULATOR
 
+	char nu[7];
+	snprintf(nu,7,"%d",kilo_uid);
+	// itoa(kilo_uid,nu,10);
+	char name[50]="stats_robot/";
+	strcat(name,nu);
+	 mydata->fichier=fopen(name,"w");
+	 mydata->ecrire=1;
+	 printf("fin setup\n" );
+
+   char nu2[12];
+   char name2[50]="stats_robot/";
+   snprintf(nu2,12,"_fit_%d",kilo_uid);
+   strcat(name2,nu2);
+   mydata->ecrire2=1;
+   mydata->fichier2=fopen(name2,"w");
+   #endif
 
 }
 
@@ -56,15 +74,25 @@ void genome_alea()
 {
   if(!mydata->nb_genome){
     mydata->dead=1;
+    set_color(0);
     mydata->last_genome_update=kilo_ticks;
     return;
   }
+  int i=0;
   uint8_t picked=rand_hard()%mydata->nb_genome;
+  int best=mydata->genome_list[picked].fitness;
+
+  for(;i<mydata->nb_genome;i++){
+    if(mydata->genome_list[i].fitness<best){
+      best=mydata->genome_list[i].fitness;
+      picked=i;
+    }
+  }
   mydata->proba=mydata->genome_list[picked].proba;
   mydata->nb_genome=0;
   mydata->last_genome_update=kilo_ticks;
+  mydata->cpt_msg=0;
   mutation();
-  if (mydata->proba > RAND_MAX) mydata->proba=RAND_MAX;
   setup_message();
 
 }
@@ -74,11 +102,16 @@ void mutation(){
     int signe=rand_hard()%2;
     int value=rand_hard()%100; //Variation de la mutation
     if (!signe){
-      mydata->proba-=value;
+      if(value>mydata->proba){
+        mydata->proba=0;
+      }else{
+        mydata->proba-=value;
+      }
     }else{
       mydata->proba+=value;
     }
   }
+  if (mydata->proba > RAND_MAX) mydata->proba=RAND_MAX;
 }
 
 
@@ -86,34 +119,42 @@ void mutation(){
 
 void loop()
 {
+  #ifdef SIMULATOR
 
-//   #ifdef SIMULATOR
-//   if (kilo_ticks%(60*SECONDE)==0 && mydata->ecrire==1){
-// 		// fprintf(mydata->fichier, "%d\n",mydata->dead );
-// 		// if(mydata->dead){
-// 		// 	fprintf(mydata->fichier, "%d\n",-1 );
-// 		// }
-// 		// else{
-// 		// 	fprintf(mydata->fichier, "%d\n",mydata->parent );
-// 		// }
-// 		if(mydata->dead){
-// 			fprintf(mydata->fichier, "%d\n",-1 );
-// 		}else{
-// 			// printf("%d\n",kilo_uid );
-// 			// printf("%d%d%d%d%d%d%d%d\n",mydata->genome[0],mydata->genome[1],mydata->genome[2],mydata->genome[3],mydata->genome[4],mydata->genome[5],mydata->genome[6],mydata->genome[7]);
-// 			fprintf(mydata->fichier, );
-// 			// printf("%d\n",kilo_uid );
-// }
-//
-// 		mydata->ecrire=0;
-// 		// printf("%d\n",kilo_uid );
-// 	}
-// if (kilo_ticks%SECONDE==1){
-// 	mydata->ecrire=1;
-// }
-//   #endif
+  if (kilo_ticks%(60*SECONDE)==0 && mydata->ecrire==1){
+    if(mydata->dead){
+      fprintf(mydata->fichier, "%d\n",-1 );
+    }else{
+      // printf("%d\n",kilo_uid );
+      // printf("%d%d%d%d%d%d%d%d\n",mydata->genome[0],mydata->genome[1],mydata->genome[2],mydata->genome[3],mydata->genome[4],mydata->genome[5],mydata->genome[6],mydata->genome[7]);
+      fprintf(mydata->fichier, "%d\n",mydata->proba );
+
+      // printf("%d\n",kilo_uid );
+  }
+  mydata->ecrire=0;
+  }
+  if (kilo_ticks%SECONDE==1){
+  	mydata->ecrire=1;
+  }
 
 
+  if (kilo_ticks%(60*SECONDE)==59 && mydata->ecrire2==1){
+    if(mydata->dead){
+      fprintf(mydata->fichier2, "%d\n",-1 );
+    }else{
+      // printf("%d\n",kilo_uid );
+      // printf("%d%d%d%d%d%d%d%d\n",mydata->genome[0],mydata->genome[1],mydata->genome[2],mydata->genome[3],mydata->genome[4],mydata->genome[5],mydata->genome[6],mydata->genome[7]);
+      fprintf(mydata->fichier2, "%d\n",fitness() );
+
+      // printf("%d\n",kilo_uid );
+  }
+  mydata->ecrire2=0;
+  }
+  if (kilo_ticks%SECONDE==1){
+    mydata->ecrire2=1;
+  }
+
+  #endif
 
 
   if (mydata->dead){
@@ -121,7 +162,7 @@ void loop()
     set_motion(STOP);
     return;
   }
-  if(kilo_ticks >= mydata->last_genome_update+60*SECONDE){
+  if(kilo_ticks >= mydata->last_genome_update+60*SECONDE){ //&& 0
     set_color(RGB(3,3,3));
     genome_alea();
   }
@@ -129,7 +170,12 @@ void loop()
 
 int rnd=rand()%32767;
 // printf("proba %d rnd %d\n",mydata->proba,rnd );
+
+
+
+
 if(mydata->new_message) update_from_message();
+setup_message();
 
 
 
@@ -188,7 +234,7 @@ int main()
 
 int16_t callback_obstacles(double x, double y, double *m1, double *m2){
 
-	//CERCLE
+	// //CERCLE
 	// if(x*x + y*y >= MUR*MUR){
 	// 		*m1 = (x<0)? 1:-1;
 	// 		*m2 =  (y<0)? 1:-1;
@@ -198,7 +244,7 @@ int16_t callback_obstacles(double x, double y, double *m1, double *m2){
 	// 		return 0;
 	// }
 
-//CARRE
+// CARRE
 
     if (x > MUR || x< -MUR || y>MUR|| y<-MUR){
       if(x>MUR || x<-MUR){
@@ -221,13 +267,13 @@ char *botinfo(void)
 {
   int i;
   char *p = botinfo_buffer;
-  p+= sprintf (p, "ID: %d state %d proba : %d is dead %d\n", kilo_uid,mydata->state,mydata->proba,mydata->dead);
+  p+= sprintf (p, "ID: %d state %d proba : %d fitness : %d is dead %d\n", kilo_uid,mydata->state,mydata->proba,fitness(),mydata->dead);
 
   // p+= sprintf (p, "move: %d wait:%d turn:%d\n", mydata->move, mydata->wait, mydata->turn);
 
   p += sprintf (p, "%d genome: ", mydata->nb_genome);
 	for(i=0; i<mydata->nb_genome;i++)
-			p+=sprintf(p, "[id : %d proba : %d]\n",mydata->genome_list[i].id,mydata->genome_list[i].proba);
+			p+=sprintf(p, "[id : %d proba : %d fitness : %d]\n",mydata->genome_list[i].id,mydata->genome_list[i].proba,mydata->genome_list[i].fitness);
   return botinfo_buffer;
 }
 
